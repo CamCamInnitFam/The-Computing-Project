@@ -25,10 +25,6 @@ public class GameByte extends GameApplication
     private static final int BLOCK_SIZE = 8;
     private static final int REDUCE_BITS = 4; //Reduce 8 bits to 4 bits per channel
 
-
-
-
-
     @Override
     protected void initSettings(GameSettings gameSettings)
     {
@@ -50,11 +46,6 @@ public class GameByte extends GameApplication
                 //System.out.println(reader.getArgb(x,y));
             }
         }*/
-
-
-
-
-
     }
 
     public static void main(String[] args) throws IOException {
@@ -63,7 +54,7 @@ public class GameByte extends GameApplication
         //launch(args);
 
         String inputImagePath = "M:\\GameByte Novel Compression Solution\\GameByte\\src\\main\\resources\\assets\\textures\\Pickaxe200.jpg";
-        String outputImagePath = "/resources/assets/textures/PickaxeCompressed.byt";
+        String outputBytFile = "M:\\GameByte Novel Compression Solution\\GameByte\\src\\main\\resources\\assets\\textures\\PickaxeCompressed.byt";
 
         BufferedImage image = ImageIO.read(new File(inputImagePath));
         //System.out.println(image);
@@ -87,10 +78,46 @@ public class GameByte extends GameApplication
         double[][]compressedDataCb = compressWithDCT(ycbcrImage[1], false); //CB, subsampled
         double[][]compressedDataCr = compressWithDCT(ycbcrImage[2], false); //CR, subsampled
 
-        //Apply huffman coding
+        int temp = 0;
+        for(int i = 0; i < compressedDataCr.length; i++){
+            for (int j = 0; j < compressedDataCr[i].length; j++){
+                System.out.println(compressedDataCr[i][j] + " ");
+                temp++;
+            }
+            System.out.println("Temp: " + temp);
+        }
 
+        //TODO look at this
+        //the above temp gets to 10,000
+        //meaning the double[][] has 10,000 elements (i think) meaning it is 100 x 100 array
+        //compress with DCT returns the coeficients as the double[][] which is usign a height and width which must be
+        //appearing as 100 each.
+        //check to see if compressedDataY should be an 8x8 block for instance
+
+        //Apply huffman coding
+        HuffmanCompressor huffmanCompressor = new HuffmanCompressor();
+        byte[] huffmanCompressedY = huffmanCompressor.encode(compressedDataY);
+        byte[] huffmanCompressedCb = huffmanCompressor.encode(compressedDataCb);
+        byte[] huffmanCompressedCr = huffmanCompressor.encode(compressedDataCr);
 
         //Save compressed data to a .byt file
+        saveToBytFile(outputBytFile, huffmanCompressedY, huffmanCompressedCb, huffmanCompressedCr);
+
+        System.out.println("Image Compressed and saved to: " + outputBytFile );
+
+    }
+
+    private static void saveToBytFile(String outputPath, byte[] yData, byte[] cbData, byte[] crData) throws IOException{
+        try{
+            FileOutputStream fos = new FileOutputStream(outputPath);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+
+            oos.writeObject(yData);
+            oos.writeObject(cbData);
+            oos.writeObject(crData);
+        }catch(Exception ex){
+            System.out.println("Something is wrong here! " + ex);
+        }
 
     }
 
