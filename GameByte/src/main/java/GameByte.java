@@ -1,6 +1,7 @@
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.net.http.HttpClientService;
 import com.almasb.fxgl.texture.Texture;
 
 import javafx.scene.image.PixelReader;
@@ -37,6 +38,7 @@ public class GameByte extends GameApplication
     protected void initSettings(GameSettings gameSettings)
     {
         gameSettings.setTitle("GameByte Compression Solution!");
+        gameSettings.addEngineService(HttpClientService.class);
     }
 
     @Override
@@ -64,6 +66,8 @@ public class GameByte extends GameApplication
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        //RobotConnector connector = new RobotConnector();
+        //connector.takePicture();
     }
 
     public static void main(String[] args) throws IOException {
@@ -390,17 +394,17 @@ public class GameByte extends GameApplication
             }
         }
 
-        byte[] rawData = buffer.array();
+        byte[] rawData = buffer.array(); //provides 5141kb
 
 
         //RLE
-        // byte[] rleData = runLengthEncode(rawData);
+        //byte[] rleData = runLengthEncode(rawData);
 
         //Pack bits encode
-        byte[] packBitsData = packBitsEncode(rawData);
+        //byte[] packBitsData = packBitsEncode(rawData);
 
         try(GZIPOutputStream gzipOut = new GZIPOutputStream(new FileOutputStream(outputBytFile))){
-            gzipOut.write(packBitsData);
+            gzipOut.write(rawData);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
