@@ -3,6 +3,8 @@ import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.net.http.HttpClientService;
 
+import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 public class RobotConnector extends GameApplication {
@@ -40,6 +42,23 @@ public class RobotConnector extends GameApplication {
 
     @Override
     protected void initGame() {
-        takePicture();
+        //takePicture();
+        String imagePath = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\RobotTest.jpg";
+        captureImageToFile(Path.of(imagePath));
+    }
+
+    public void captureImageToFile(Path file)
+    {
+        FXGL.getService(HttpClientService.class).sendGETRequestTask("https://rt-0143.robothespian.co.uk/tritium/video_capture/jpeg", Map.of("X-Tritium-Auth-Token", getKey()),
+                HttpResponse.BodyHandlers.ofFile(file))
+                .onSuccess(res -> System.out.println(res.statusCode()))
+                .onFailure(e->{
+                    //
+                })
+                .run();
+    }
+
+    private String getKey(){
+        return "hALeFOM4uzqpK6KWSr6ADY5Ou9MNXd";
     }
 }
