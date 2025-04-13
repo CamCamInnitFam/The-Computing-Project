@@ -4,20 +4,15 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import javax.imageio.ImageIO;
 
-public class ImageCompressor {
+public class GameByteVer1 {
 
-    // Hardcoded dimensions for demonstration (normally provided externally)
+    // Hardcoded dimensions (needs improvement for improved usability, but may require header).
     private static final int WIDTH = 2000;
     private static final int HEIGHT = 2000;
-    //private static final String INPUT_FILE = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\Pickaxe200.jpg";
-    //private static final String COMPRESSED_FILE = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\2003compressed.byt";
-    //private static final String DECOMPRESSED_FILE = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\2003deCompressed.jpg";
 
     private static final String INPUT_FILE = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\948688.jpg";
     private static final String COMPRESSED_FILE = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\948688Compressed.byt";
     private static final String DECOMPRESSED_FILE = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\948688Decompressed.jpg";
-
-
 
     public static void main(String[] args) throws IOException {
         compress();
@@ -56,8 +51,6 @@ public class ImageCompressor {
             int diff = (curr - prev) & 0xFF; // Modulo 256
             filteredData[i] = (byte) diff;
         }
-
-
 
         // Step 3: Compress with GZIP
         try (FileOutputStream fos = new FileOutputStream(COMPRESSED_FILE);
