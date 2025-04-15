@@ -21,6 +21,7 @@ public class GameByteVer1 {
 
     public static void compress() throws IOException {
         // Load image using ImageIO
+        long startTime = System.nanoTime();
         BufferedImage img = ImageIO.read(new File(INPUT_FILE));
         int width = img.getWidth();
         int height = img.getHeight();
@@ -48,7 +49,7 @@ public class GameByteVer1 {
         for (int i = 1; i < rawData.length; i++) {
             int curr = rawData[i] & 0xFF;
             int prev = rawData[i - 1] & 0xFF;
-            int diff = (curr - prev) & 0xFF; // Modulo 256
+            int diff = (curr - prev) & 0xFF;
             filteredData[i] = (byte) diff;
         }
 
@@ -58,13 +59,20 @@ public class GameByteVer1 {
             gzipOut.write(filteredData);
         }
 
+        long endTime = System.nanoTime();
+        double timeTakenMs = (endTime - startTime) / 1_000_000.0;
+        double timeTakenS = (endTime - startTime) / 1_000_000_000.0;
+
         System.out.println("Image compressed and saved as " + COMPRESSED_FILE);
+        System.out.printf("\nTime taken to compress: %.2f ms%n", timeTakenMs);
+        System.out.println(String.format("%.2f", timeTakenS) + " seconds.");
 
         //Output size
         File compressedFile = new File(COMPRESSED_FILE);
         long fileSizeBytes = compressedFile.length();
         double fileSizeKB = fileSizeBytes / 1024.0;
-        System.out.println("Compressed File Size: " + fileSizeBytes + " bytes (" + String.format("%.2f", fileSizeKB) + " KB)");
+        System.out.println("Compressed File Size: "
+                + fileSizeBytes + " bytes (" + String.format("%.2f", fileSizeKB) + " KB)");
     }
 
     public static void decompress() throws IOException {

@@ -37,10 +37,12 @@ public class GameByteCompressorZSTD {
     };
 
     public static void main(String[] args) {
-        String inputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\Pickaxe200.jpg";
-        String outputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\Pickaxe200.byt";
+
+        String inputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\948688.jpg";
+        String outputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\948688.byt";
 
         try {
+            long startTime = System.nanoTime();
             // Read JPEG image
             BufferedImage image = ImageIO.read(new File(inputFile));
             if (image == null) {
@@ -79,8 +81,10 @@ public class GameByteCompressorZSTD {
 
             int paddedHeightChroma = ((subsampledHeight + BLOCK_SIZE - 1) / BLOCK_SIZE) * BLOCK_SIZE;
             int paddedWidthChroma = ((subsampledWidth + BLOCK_SIZE - 1) / BLOCK_SIZE) * BLOCK_SIZE;
-            double[][] paddedCb = padChannel(subsampledCb, paddedHeightChroma, paddedWidthChroma, subsampledHeight, subsampledWidth);
-            double[][] paddedCr = padChannel(subsampledCr, paddedHeightChroma, paddedWidthChroma, subsampledHeight, subsampledWidth);
+            double[][] paddedCb = padChannel(subsampledCb, paddedHeightChroma,
+                    paddedWidthChroma, subsampledHeight, subsampledWidth);
+            double[][] paddedCr = padChannel(subsampledCr, paddedHeightChroma,
+                    paddedWidthChroma, subsampledHeight, subsampledWidth);
 
             // Compress and write output using Zstd
             try (ZstdOutputStream zos = new ZstdOutputStream(new FileOutputStream(outputFile));
@@ -101,7 +105,31 @@ public class GameByteCompressorZSTD {
                 processChannel(paddedY, paddedHeightY, paddedWidthY, LUMINANCE_QUANT_MATRIX, dos);
                 processChannel(paddedCb, paddedHeightChroma, paddedWidthChroma, CHROMINANCE_QUANT_MATRIX, dos);
                 processChannel(paddedCr, paddedHeightChroma, paddedWidthChroma, CHROMINANCE_QUANT_MATRIX, dos);
-                System.out.println("Compression complete: " + outputFile);
+
+                System.out.println("Image Compressed Successfully and Saved as: " + outputFile);
+
+                //Evaluation
+                long endTime = System.nanoTime();
+                double timeTakenMs = (endTime - startTime) / 1_000_000.0;
+                double timeTakenS = (endTime - startTime) / 1_000_000_000.0;
+                System.out.printf("\nTime taken to compress: %.2f ms%n", timeTakenMs);
+                System.out.println(String.format("%.2f", timeTakenS) + " seconds.");
+
+                //Output size & Comparison
+                File uncompressedFile = new File(inputFile);
+                long fileSizeBytes = uncompressedFile.length();
+                double fileSizeKB1 = fileSizeBytes / 1024.0;
+                System.out.println("\nOriginal File Size: " +
+                        fileSizeBytes + " bytes(" + String.format("%.2f", fileSizeKB1) + " KB)");
+
+                File compressedFile = new File(outputFile);
+                fileSizeBytes = compressedFile.length();
+                double fileSizeKB2 = fileSizeBytes / 1024.0;
+                System.out.println("\nCompressed File Size: " +
+                        fileSizeBytes + " bytes (" + String.format("%.2f", fileSizeKB2) + " KB)");
+
+                System.out.println("\nSize Difference: " + String.format("%.2f", (fileSizeKB2 - fileSizeKB1)) + " KB");
+
             }
         } catch (IOException e) {
             System.err.println("Error during compression: " + e.getMessage());
@@ -145,7 +173,9 @@ public class GameByteCompressorZSTD {
         return padded;
     }
 
-    private static void processChannel(double[][] channel, int height, int width, int[][] quantMatrix, DataOutputStream dos) throws IOException {
+    private static void processChannel(double[][] channel, int height, int width,
+                                       int[][] quantMatrix, DataOutputStream dos)
+                                        throws IOException {
         DoubleDCT_2D dct = new DoubleDCT_2D(BLOCK_SIZE, BLOCK_SIZE);
         for (int y = 0; y < height; y += BLOCK_SIZE) {
             for (int x = 0; x < width; x += BLOCK_SIZE) {
@@ -168,7 +198,9 @@ public class GameByteCompressorZSTD {
         }
     }
 
-    private static void packIndices(double[] zigZag, float[] qualityLevels, DataOutputStream dos) throws IOException {
+    private static void packIndices(double[] zigZag,
+                                    float[] qualityLevels,
+                                    DataOutputStream dos) throws IOException {
         int lastNonZero = -1;
         for (int i = zigZag.length - 1; i >= 0; i--) {
             if (zigZag[i] != 0) {
