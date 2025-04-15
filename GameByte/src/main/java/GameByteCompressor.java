@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import org.jtransforms.dct.DoubleDCT_2D;
 
-public class GameByteCompressorZSTD {
+public class GameByteCompressor {
 
     private static final int BLOCK_SIZE = 8;
     private static final float[] QUALITY_LEVELS = {0.75f, 1.0f, 1.25f, 1.5f};

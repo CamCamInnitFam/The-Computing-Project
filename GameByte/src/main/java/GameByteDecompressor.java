@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import org.jtransforms.dct.DoubleDCT_2D;
 
-public class GameByteDecompressorZSTD {
+public class GameByteDecompressor {
 
     private static final int BLOCK_SIZE = 8;
     private static final int[][] LUMINANCE_QUANT_MATRIX = {
