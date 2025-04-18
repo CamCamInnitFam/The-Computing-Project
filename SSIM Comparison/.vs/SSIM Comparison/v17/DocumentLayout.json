@@ -1,9 +1,9 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\ccroo\\source\\repos\\SSIM Comparison\\",
+  "WorkspaceRootPath": "E:\\Uni work\\Computing Project\\The-Computing-Project\\SSIM Comparison\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{12485318-9E44-49F5-8D51-8582EA010652}|SSIM Comparison.vcxproj|C:\\Users\\ccroo\\source\\repos\\SSIM Comparison\\SSIM Comparison.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{12485318-9E44-49F5-8D51-8582EA010652}|SSIM Comparison.vcxproj|E:\\Uni work\\Computing Project\\The-Computing-Project\\SSIM Comparison\\SSIM Comparison.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{12485318-9E44-49F5-8D51-8582EA010652}|SSIM Comparison.vcxproj|solutionrelative:SSIM Comparison.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
@@ -20,9 +20,9 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "SSIM Comparison.cpp",
-              "DocumentMoniker": "C:\\Users\\ccroo\\source\\repos\\SSIM Comparison\\SSIM Comparison.cpp",
+              "DocumentMoniker": "E:\\Uni work\\Computing Project\\The-Computing-Project\\SSIM Comparison\\SSIM Comparison.cpp",
               "RelativeDocumentMoniker": "SSIM Comparison.cpp",
-              "ToolTip": "C:\\Users\\ccroo\\source\\repos\\SSIM Comparison\\SSIM Comparison.cpp",
+              "ToolTip": "E:\\Uni work\\Computing Project\\The-Computing-Project\\SSIM Comparison\\SSIM Comparison.cpp",
               "RelativeToolTip": "SSIM Comparison.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAFEAAAA8AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
