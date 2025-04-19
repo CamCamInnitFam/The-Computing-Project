@@ -35,8 +35,8 @@ public class GameByteDecompressor {
     };
 
     public static void main(String[] args) {
-        String inputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\948688.byt";
-        String outputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\948688_decompressed.jpg";
+        String inputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\Compressed\\10.byt";
+        String outputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\Uncompressed\\10.jpg";
 
         long startTime = System.nanoTime();
         try (ZstdInputStream zis = new ZstdInputStream(new FileInputStream(inputFile));
