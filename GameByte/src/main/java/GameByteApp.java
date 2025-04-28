@@ -43,9 +43,9 @@ public class GameByteApp extends GameApplication {
 
     @Override
     protected void initSettings(GameSettings settings) {
-        settings.setTitle("GameByte Compressor");
+        settings.setTitle("GameByte");
         settings.setWidth(900);
-        settings.setHeight(700);
+        settings.setHeight(800);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class GameByteApp extends GameApplication {
             URL u = getClass().getResource(p);
             if (u != null) {
                 logo.setImage(new Image(u.toExternalForm()));
-                logo.setFitWidth(325);
+                logo.setFitWidth(350);
                 logo.setPreserveRatio(true);
                 break;
             }
@@ -82,7 +82,7 @@ public class GameByteApp extends GameApplication {
         grid.setHgap(20);
         grid.setVgap(10);
         grid.setAlignment(Pos.CENTER);
-        grid.setPadding(new Insets(5));
+        grid.setPadding(new Insets(10));
         grid.setMaxWidth(Double.MAX_VALUE);
         grid.setPrefWidth(870);
 
@@ -98,38 +98,38 @@ public class GameByteApp extends GameApplication {
         // Row constraints
         RowConstraints row0 = new RowConstraints();
         row0.setVgrow(Priority.ALWAYS);
-        row0.setMaxHeight(260); // Reduced from 300
+        row0.setMaxHeight(400);
         RowConstraints row1 = new RowConstraints();
         row1.setVgrow(Priority.NEVER);
-        row1.setMinHeight(50);
+        row1.setMinHeight(60);
         grid.getRowConstraints().addAll(row0, row1);
 
         // Compress section
         Text compressTitle = FXGL.getUIFactoryService().newText("Compressor");
-        compressTitle.setFill(Color.DARKBLUE);
+        compressTitle.setFill(Color.DARKRED);
         compressTitle.setStyle("-fx-font-size: 18px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold;");
         compressDropLabel = createDropLabel("Drag .jpg here", "#ff6f61");
         compressPreview = createPreview();
         compressProgressBar = new ProgressBar(0);
         compressProgressBar.setMaxWidth(Double.MAX_VALUE);
-        VBox compressPane = new VBox(3, compressTitle, compressDropLabel, compressPreview, compressProgressBar);
+        VBox compressPane = new VBox(10, compressTitle, compressDropLabel, compressPreview, compressProgressBar);
         compressPane.setAlignment(Pos.CENTER);
         compressPane.setStyle("-fx-background-color: #f4f0e4;");
         setupDragHandlers(compressDropLabel, ".jpg", file -> {
             compressFile = file;
             compressDropLabel.setText(file.getName());
-            compressPreview.setImage(new Image(file.toURI().toString(), 350, 110, true, true));
+            compressPreview.setImage(new Image(file.toURI().toString(), 350, 150, true, true));
         });
 
         // Decompress section
         Text decompressTitle = FXGL.getUIFactoryService().newText("Decompressor");
-        decompressTitle.setFill(Color.DARKBLUE);
+        decompressTitle.setFill(Color.DARKGREEN);
         decompressTitle.setStyle("-fx-font-size: 18px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold;");
         decompressDropLabel = createDropLabel("Drag .byt here", "#4caf50");
         decompressPreview = createPreview();
         decompressProgressBar = new ProgressBar(0);
         decompressProgressBar.setMaxWidth(Double.MAX_VALUE);
-        VBox decompressPane = new VBox(3, decompressTitle, decompressDropLabel, decompressPreview, decompressProgressBar);
+        VBox decompressPane = new VBox(10, decompressTitle, decompressDropLabel, decompressPreview, decompressProgressBar);
         decompressPane.setAlignment(Pos.CENTER);
         decompressPane.setStyle("-fx-background-color: #f4f0e4;");
         setupDragHandlers(decompressDropLabel, ".byt", file -> {
@@ -139,8 +139,8 @@ public class GameByteApp extends GameApplication {
         });
 
         // Buttons
-        String compStyle = "-fx-background-color: #ff6f61; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold; -fx-border-radius: 5px; -fx-padding: 6 12;";
-        String compHover = "-fx-background-color: #e55a50; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold; -fx-border-radius: 5px; -fx-padding: 6 12;";
+        String compStyle = "-fx-background-color: #ff6f61; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold; -fx-border-radius: 5px; -fx-padding: 8 16;";
+        String compHover = "-fx-background-color: #e55a50; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold; -fx-border-radius: 5px; -fx-padding: 8 16;";
         FXGLButton compressBtn = (FXGLButton) FXGL.getUIFactoryService().newButton("Compress");
         compressBtn.setStyle(compStyle);
         compressBtn.setPrefWidth(180);
@@ -148,8 +148,8 @@ public class GameByteApp extends GameApplication {
         compressBtn.setOnMouseExited(e -> compressBtn.setStyle(compStyle));
         compressBtn.setOnAction(e -> runCompressTask());
 
-        String decompStyle = "-fx-background-color: #4caf50; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold; -fx-border-radius: 5px; -fx-padding: 6 12;";
-        String decompHover = "-fx-background-color: #3fa045; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold; -fx-border-radius: 5px; -fx-padding: 6 12;";
+        String decompStyle = "-fx-background-color: #4caf50; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold; -fx-border-radius: 5px; -fx-padding: 8 16;";
+        String decompHover = "-fx-background-color: #3fa045; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold; -fx-border-radius: 5px; -fx-padding: 8 16;";
         FXGLButton decompressBtn = (FXGLButton) FXGL.getUIFactoryService().newButton("Decompress");
         decompressBtn.setStyle(decompStyle);
         decompressBtn.setPrefWidth(180);
@@ -160,10 +160,10 @@ public class GameByteApp extends GameApplication {
         // Center buttons
         HBox compressBtnBox = new HBox(compressBtn);
         compressBtnBox.setAlignment(Pos.CENTER);
-        compressBtnBox.setPadding(new Insets(2));
+        compressBtnBox.setPadding(new Insets(5));
         HBox decompressBtnBox = new HBox(decompressBtn);
         decompressBtnBox.setAlignment(Pos.CENTER);
-        decompressBtnBox.setPadding(new Insets(2));
+        decompressBtnBox.setPadding(new Insets(5));
 
         // Add to grid
         grid.add(compressPane, 0, 0);
@@ -172,9 +172,9 @@ public class GameByteApp extends GameApplication {
         grid.add(decompressBtnBox, 1, 1);
 
         // Main content layout (logo, grid)
-        VBox content = new VBox(5, logo, grid);
+        VBox content = new VBox(10, logo, grid);
         content.setAlignment(Pos.CENTER);
-        content.setPadding(new Insets(5, 15, 15, 15));
+        content.setPadding(new Insets(15, 15, 20, 15));
         content.setStyle("-fx-background-color: #f4f0e4;");
         content.setMaxWidth(Double.MAX_VALUE);
         VBox.setVgrow(grid, Priority.ALWAYS);
@@ -239,7 +239,7 @@ public class GameByteApp extends GameApplication {
     private ImageView createPreview() {
         ImageView iv = new ImageView();
         iv.setFitWidth(350);
-        iv.setFitHeight(110); // Reduced from 130
+        iv.setFitHeight(150);
         iv.setPreserveRatio(true);
         iv.setStyle("-fx-border-color: lightgray; -fx-border-radius: 5px; -fx-background-radius: 5px;");
         return iv;
@@ -303,7 +303,7 @@ public class GameByteApp extends GameApplication {
             File outFile = new File(decompressFile.getParent() + File.separator + "decompressed_" + decompressFile.getName().replace(".byt", ".jpg"));
             showDecompressionResult(decompressFile, outFile);
             if (outFile.exists()) {
-                decompressPreview.setImage(new Image(outFile.toURI().toString(), 350, 110, true, true));
+                decompressPreview.setImage(new Image(outFile.toURI().toString(), 350, 150, true, true));
             }
         });
         task.setOnFailed(e -> handleError(task.getException()));
