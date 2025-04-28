@@ -38,8 +38,8 @@ public class GameByteCompressor {
 
     public static void main(String[] args) {
 
-        String inputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\948688.jpg";
-        String outputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\948688.byt";
+        String inputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\Dataset\\10.jpg";
+        String outputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\Compressed\\10.byt";
 
         try {
             long startTime = System.nanoTime();
@@ -115,6 +115,10 @@ public class GameByteCompressor {
                 System.out.printf("\nTime taken to compress: %.2f ms%n", timeTakenMs);
                 System.out.println(String.format("%.2f", timeTakenS) + " seconds.");
 
+                //clear
+                dos.close();
+                zos.close();
+
                 //Output size & Comparison
                 File uncompressedFile = new File(inputFile);
                 long fileSizeBytes = uncompressedFile.length();
@@ -123,12 +127,13 @@ public class GameByteCompressor {
                         fileSizeBytes + " bytes(" + String.format("%.2f", fileSizeKB1) + " KB)");
 
                 File compressedFile = new File(outputFile);
+                //if(compressedFile.exists() && compressedFile.canRead())
                 fileSizeBytes = compressedFile.length();
                 double fileSizeKB2 = fileSizeBytes / 1024.0;
                 System.out.println("\nCompressed File Size: " +
                         fileSizeBytes + " bytes (" + String.format("%.2f", fileSizeKB2) + " KB)");
 
-                System.out.println("\nSize Difference: " + String.format("%.2f", (fileSizeKB2 - fileSizeKB1)) + " KB");
+                System.out.println("\nSize Reduction: " + String.format("%.2f", (fileSizeKB2 - fileSizeKB1)) + " KB");
 
             }
         } catch (IOException e) {

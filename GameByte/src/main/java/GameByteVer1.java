@@ -7,12 +7,12 @@ import javax.imageio.ImageIO;
 public class GameByteVer1 {
 
     // Hardcoded dimensions (needs improvement for improved usability, but may require header).
-    private static final int WIDTH = 2000;
-    private static final int HEIGHT = 2000;
+    private static final int WIDTH = 640;
+    private static final int HEIGHT = 480;
 
-    private static final String INPUT_FILE = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\948688.jpg";
-    private static final String COMPRESSED_FILE = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\948688Compressed.byt";
-    private static final String DECOMPRESSED_FILE = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\948688Decompressed.jpg";
+    private static final String INPUT_FILE = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\Dataset\\10.jpg";
+    private static final String COMPRESSED_FILE = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\Compressed\\10.byt1";
+    private static final String DECOMPRESSED_FILE = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\Uncompressed\\10ver1.jpg";
 
     public static void main(String[] args) throws IOException {
         compress();
@@ -60,6 +60,7 @@ public class GameByteVer1 {
         }
 
         long endTime = System.nanoTime();
+
         double timeTakenMs = (endTime - startTime) / 1_000_000.0;
         double timeTakenS = (endTime - startTime) / 1_000_000_000.0;
 
