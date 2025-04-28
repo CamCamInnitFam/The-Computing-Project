@@ -34,12 +34,17 @@ public class GameByteDecompressor {
             58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63
     };
 
-    public static void main(String[] args) {
-        String inputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\Compressed\\10.byt";
-        String outputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\Uncompressed\\10.jpg";
+    public static void main(String[] args) throws Exception{
+        if(args.length <2){
+            System.err.println("Usage: java GameByteDecompressor <input.byt> <output.jpg>");
+            System.exit(1);
+        }
+        decompress(args[0], args[1]);
+    }
 
+    public static void decompress(String inputPath, String outputPath) throws Exception{
         long startTime = System.nanoTime();
-        try (ZstdInputStream zis = new ZstdInputStream(new FileInputStream(inputFile));
+        try (ZstdInputStream zis = new ZstdInputStream(new FileInputStream(inputPath));
              DataInputStream dis = new DataInputStream(zis)) {
             // Read header
             int originalWidth = dis.readInt();
@@ -82,8 +87,8 @@ public class GameByteDecompressor {
             }
 
             // Write JPEG image
-            ImageIO.write(image, "jpg", new File(outputFile));
-            System.out.println("Decompression complete and saved as: " + outputFile);
+            ImageIO.write(image, "jpg", new File(outputPath));
+            System.out.println("Decompression complete and saved as: " + outputPath);
 
             //Time
             long endTime = System.nanoTime();
@@ -92,12 +97,12 @@ public class GameByteDecompressor {
             System.out.println("\nTime taken: " + String.format("%.2f", timeTakenMs) + " Ms/" + String.format("%.2f", timeTakenS) + " S");
 
             //Size
-            File compressedFile = new File(inputFile);
+            File compressedFile = new File(inputPath);
             long fileSizeBytes1 = compressedFile.length();
             double fileSizeKb1 = fileSizeBytes1 / 1024.0;
             System.out.println("\nCompressed File Size (.byt): " + fileSizeBytes1 + " bytes (" + String.format("%.2f", fileSizeKb1) + " KB)");
 
-            File decompressedFile = new File(outputFile);
+            File decompressedFile = new File(outputPath);
             long fileSizeBytes = decompressedFile.length();
             double fileSizeKB = fileSizeBytes / 1024.0;
             System.out.println("\nDecompressed File size (jpg): " + fileSizeBytes + " bytes (" +

@@ -36,17 +36,22 @@ public class GameByteCompressor {
             58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63
     };
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
+        if(args.length <2){
+            System.err.println("Usage: java GameByteCompressor <input.jpg> <output.byt>");
+            System.exit(1);
+        }
+        compress(args[0], args[1]);
+    }
 
-        String inputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\Dataset\\10.jpg";
-        String outputFile = "E:\\Uni work\\Computing Project\\The-Computing-Project\\GameByte\\src\\main\\resources\\assets\\textures\\Compressed\\10.byt";
+    public static void compress(String inputPath, String outputPath) throws Exception{
 
         try {
             long startTime = System.nanoTime();
             // Read JPEG image
-            BufferedImage image = ImageIO.read(new File(inputFile));
+            BufferedImage image = ImageIO.read(new File(inputPath));
             if (image == null) {
-                System.err.println("Failed to read image: " + inputFile);
+                System.err.println("Failed to read image: " + inputPath);
                 return;
             }
             int width = image.getWidth();
@@ -87,7 +92,7 @@ public class GameByteCompressor {
                     paddedWidthChroma, subsampledHeight, subsampledWidth);
 
             // Compress and write output using Zstd
-            try (ZstdOutputStream zos = new ZstdOutputStream(new FileOutputStream(outputFile));
+            try (ZstdOutputStream zos = new ZstdOutputStream(new FileOutputStream(outputPath));
                  DataOutputStream dos = new DataOutputStream(zos)) {
                 // Write header
                 dos.writeInt(width);
@@ -106,7 +111,7 @@ public class GameByteCompressor {
                 processChannel(paddedCb, paddedHeightChroma, paddedWidthChroma, CHROMINANCE_QUANT_MATRIX, dos);
                 processChannel(paddedCr, paddedHeightChroma, paddedWidthChroma, CHROMINANCE_QUANT_MATRIX, dos);
 
-                System.out.println("Image Compressed Successfully and Saved as: " + outputFile);
+                System.out.println("Image Compressed Successfully and Saved as: " + outputPath);
 
                 //Evaluation
                 long endTime = System.nanoTime();
@@ -120,13 +125,13 @@ public class GameByteCompressor {
                 zos.close();
 
                 //Output size & Comparison
-                File uncompressedFile = new File(inputFile);
+                File uncompressedFile = new File(inputPath);
                 long fileSizeBytes = uncompressedFile.length();
                 double fileSizeKB1 = fileSizeBytes / 1024.0;
                 System.out.println("\nOriginal File Size: " +
                         fileSizeBytes + " bytes(" + String.format("%.2f", fileSizeKB1) + " KB)");
 
-                File compressedFile = new File(outputFile);
+                File compressedFile = new File(outputPath);
                 //if(compressedFile.exists() && compressedFile.canRead())
                 fileSizeBytes = compressedFile.length();
                 double fileSizeKB2 = fileSizeBytes / 1024.0;
