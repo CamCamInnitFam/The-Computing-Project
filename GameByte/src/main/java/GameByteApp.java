@@ -193,7 +193,7 @@ public class GameByteApp extends GameApplication {
         });
 
         // Load sound
-        URL soundUrl = getClass().getResource("/success.wav");
+        URL soundUrl = getClass().getResource("/assets/textures/Audio/done.wav");
         if (soundUrl != null) {
             successSound = new AudioClip(soundUrl.toExternalForm());
         }
