@@ -5,7 +5,6 @@ import com.almasb.fxgl.net.http.HttpClientService;
 
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 public class RobotConnector extends GameApplication {
 
@@ -32,7 +31,7 @@ public class RobotConnector extends GameApplication {
                 HttpResponse.BodyHandlers.ofFile(file))
                 .onSuccess(res -> System.out.println(res.statusCode()))
                 .onFailure(e->{
-                    //
+                    System.out.println("Error! Get request failure.");
                 })
                 .run();
     }

@@ -18,7 +18,6 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.application.Platform;
-import javafx.util.Duration;
 
 import java.io.File;
 import java.net.URL;
@@ -377,7 +376,6 @@ public class GameByteApp extends GameApplication {
                     break;
                 }
             }
-
             event.consume();
         });
 
