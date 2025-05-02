@@ -36,7 +36,7 @@ public class GameByteDecompressor {
 
     public static void main(String[] args) throws Exception{
         if(args.length <2){
-            System.err.println("Usage: java GameByteDecompressor <input.byt> <output.jpg>");
+            System.err.println("Usage: java GameByteDecompressor <input.byt> <output.jpg/output.png>");
             System.exit(1);
         }
         decompress(args[0], args[1]);

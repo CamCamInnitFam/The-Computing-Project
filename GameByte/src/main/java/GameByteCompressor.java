@@ -38,7 +38,7 @@ public class GameByteCompressor {
 
     public static void main(String[] args) throws Exception{
         if(args.length <2){
-            System.err.println("Usage: java GameByteCompressor <input.jpg> <output.byt>");
+            System.err.println("Usage: java GameByteCompressor <input.jpg/input.png> <output.byt>");
             System.exit(1);
         }
         compress(args[0], args[1]);
@@ -47,6 +47,11 @@ public class GameByteCompressor {
     public static void compress(String inputPath, String outputPath) throws Exception{
 
         try {
+            if(!inputPath.contains(".jpg") && !inputPath.contains(".png")){
+                System.err.println("Error: Input file must be .jpg or .png");
+                return;
+            }
+
             long startTime = System.nanoTime();
             // Read JPEG image
             BufferedImage image = ImageIO.read(new File(inputPath));
@@ -62,7 +67,8 @@ public class GameByteCompressor {
             double[][] Cb = new double[height][width];
             double[][] Cr = new double[height][width];
             for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
+                for (int x =
+                     0; x < width; x++) {
                     int rgb = image.getRGB(x, y);
                     int r = (rgb >> 16) & 0xFF;
                     int g = (rgb >> 8) & 0xFF;

@@ -108,17 +108,20 @@ public class GameByteApp extends GameApplication {
         Text compressTitle = FXGL.getUIFactoryService().newText("Compressor");
         compressTitle.setFill(Color.DARKRED);
         compressTitle.setStyle("-fx-font-size: 18px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold;");
-        compressDropLabel = createDropLabel("Drag .jpg here", "#ff6f61");
+        compressDropLabel = createDropLabel("Drag .jpg/.png here", "#ff6f61");
         compressPreview = createPreview();
         compressProgressBar = new ProgressBar(0);
         compressProgressBar.setMaxWidth(Double.MAX_VALUE);
         VBox compressPane = new VBox(10, compressTitle, compressDropLabel, compressPreview, compressProgressBar);
         compressPane.setAlignment(Pos.CENTER);
         compressPane.setStyle("-fx-background-color: #f4f0e4;");
-        setupDragHandlers(compressDropLabel, ".jpg", file -> {
+        String[] acceptedFileExtensions = {".jpg", ".png"};
+        setupDragHandlers(compressDropLabel, acceptedFileExtensions, file -> {
             compressFile = file;
             compressDropLabel.setText(file.getName());
             compressPreview.setImage(new Image(file.toURI().toString(), 350, 150, true, true));
+
+            FXGL.animationBuilder().fadeIn(compressPreview).buildAndPlay();
         });
 
         // Decompress section
@@ -132,7 +135,7 @@ public class GameByteApp extends GameApplication {
         VBox decompressPane = new VBox(10, decompressTitle, decompressDropLabel, decompressPreview, decompressProgressBar);
         decompressPane.setAlignment(Pos.CENTER);
         decompressPane.setStyle("-fx-background-color: #f4f0e4;");
-        setupDragHandlers(decompressDropLabel, ".byt", file -> {
+        setupDragHandlers(decompressDropLabel, new String[]{".byt"}, file -> {
             decompressFile = file;
             decompressDropLabel.setText(file.getName());
             decompressPreview.setImage(null);
@@ -255,7 +258,8 @@ public class GameByteApp extends GameApplication {
             @Override
             protected Void call() {
                 updateProgress(-1, 1);
-                String outputPath = compressFile.getParent() + File.separator + "compressed_" + compressFile.getName().replace(".jpg", ".byt");
+                String fileExtension = compressFile.getName().contains(".png") ? ".png" : ".jpg";
+                String outputPath = compressFile.getParent() + File.separator + "compressed_" + compressFile.getName().replace(fileExtension, ".byt");
                 try {
                     GameByteCompressor.compress(compressFile.getAbsolutePath(), outputPath);
                 } catch (Exception e) {
@@ -286,7 +290,8 @@ public class GameByteApp extends GameApplication {
             @Override
             protected Void call() {
                 updateProgress(-1, 1);
-                String outputPath = decompressFile.getParent() + File.separator + "decompressed_" + decompressFile.getName().replace(".byt", ".jpg");
+                String replacement = compressFile.getAbsolutePath().contains(".png") ? ".png" : ".jpg";
+                String outputPath = decompressFile.getParent() + File.separator + "decompressed_" + decompressFile.getName().replace(".byt", replacement);
                 try {
                     GameByteDecompressor.decompress(decompressFile.getAbsolutePath(), outputPath);
                 } catch (Exception e) {
@@ -352,7 +357,7 @@ public class GameByteApp extends GameApplication {
         decompressPreview.setImage(null);
         compressProgressBar.setProgress(0);
         decompressProgressBar.setProgress(0);
-        compressDropLabel.setText("Drag .jpg here");
+        compressDropLabel.setText("Drag .jpg/.png here");
         decompressDropLabel.setText("Drag .byt here");
     }
 
@@ -362,12 +367,16 @@ public class GameByteApp extends GameApplication {
         }
     }
 
-    private void setupDragHandlers(Label label, String extension, Consumer<File> onDrop) {
+    private void setupDragHandlers(Label label, String[] extensions, Consumer<File> onDrop) {
         label.setOnDragOver(event -> {
             Dragboard db = event.getDragboard();
-            if (db.hasFiles() && db.getFiles().get(0).getName().toLowerCase().endsWith(extension)) {
-                event.acceptTransferModes(TransferMode.COPY);
+            for(String extension : extensions){
+                if (db.hasFiles() && db.getFiles().get(0).getName().toLowerCase().endsWith(extension)) {
+                    event.acceptTransferModes(TransferMode.COPY);
+                    break;
+                }
             }
+
             event.consume();
         });
 
@@ -376,9 +385,12 @@ public class GameByteApp extends GameApplication {
             boolean success = false;
             if (db.hasFiles()) {
                 File file = db.getFiles().get(0);
-                if (file.getName().toLowerCase().endsWith(extension)) {
-                    onDrop.accept(file);
-                    success = true;
+                for(String extension : extensions){
+                    if (file.getName().toLowerCase().endsWith(extension)) {
+                        onDrop.accept(file);
+                        success = true;
+                        break;
+                    }
                 }
             }
             event.setDropCompleted(success);
