@@ -38,6 +38,6 @@ public class RobotConnector extends GameApplication {
     }
 
     private String getKey(){
-        return "hALeFOM4uzqpK6KWSr6ADY5Ou9MNXd";
+        return "";
     }
 }
