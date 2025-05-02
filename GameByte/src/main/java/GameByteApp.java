@@ -18,6 +18,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.application.Platform;
+import javafx.util.Duration;
 
 import java.io.File;
 import java.net.URL;
@@ -250,7 +251,7 @@ public class GameByteApp extends GameApplication {
 
     private void runCompressTask() {
         if (compressFile == null) {
-            showError("Please drag a .jpg file first.");
+            showError("Please drag a file first.");
             return;
         }
 
@@ -268,12 +269,12 @@ public class GameByteApp extends GameApplication {
                 return null;
             }
         };
-
+        String target = compressFile.getAbsolutePath().contains(".png") ? ".png" : ".jpg";
         bindProgress(task, compressProgressBar);
         task.setOnSucceeded(e -> {
-            completeProgress(compressProgressBar);
-            playSuccessSound();
-            showCompressionResult(compressFile, new File(compressFile.getParent() + File.separator + "compressed_" + compressFile.getName().replace(".jpg", ".byt")));
+                completeProgress(compressProgressBar);
+                playSuccessSound();
+                showCompressionResult(compressFile, new File(compressFile.getParent() + File.separator + "compressed_" + compressFile.getName().replace(target, ".byt")));
         });
         task.setOnFailed(e -> handleError(task.getException()));
 
