@@ -1,10 +1,15 @@
+// File: GameByteApp.java
+
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.ui.FXGLButton;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
@@ -17,13 +22,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.application.Platform;
 
 import java.io.File;
 import java.net.URL;
 import java.util.function.Consumer;
 
 public class GameByteApp extends GameApplication {
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -41,211 +46,159 @@ public class GameByteApp extends GameApplication {
     private Label compressDropLabel;
     private Label decompressDropLabel;
 
+    private ImageView logo;
+    private int logoIndex = 0;
+
+    long startTime;
+    long endTime;
+
+    private final String[] slideshowImages = {
+            "/assets/textures/Slideshow/gamebyte_logo.png",
+            "/assets/textures/Slideshow/Slide2.PNG",
+            "/assets/textures/Slideshow/Slide3.PNG",
+            "/assets/textures/Slideshow/Slide4.PNG",
+            "/assets/textures/Slideshow/Slide5.PNG",
+            "/assets/textures/Slideshow/Slide6.PNG"
+    };
+
+    private CheckBox pngCheckBox;
+
     @Override
     protected void initSettings(GameSettings settings) {
         settings.setTitle("GameByte");
-        settings.setWidth(900);
-        settings.setHeight(800);
+        settings.setWidth(1920);
+        settings.setHeight(1080);
     }
 
     @Override
     protected void initUI() {
-        // Root pane with background color
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: #f4f0e4;");
 
-        // Logo
-        ImageView logo = new ImageView();
-        String[] logoPaths = {"/assets/textures/gamebyte_logo.png", "/gamebyte_logo.png"};
-        for (String p : logoPaths) {
-            URL u = getClass().getResource(p);
-            if (u != null) {
-                logo.setImage(new Image(u.toExternalForm()));
-                logo.setFitWidth(350);
-                logo.setPreserveRatio(true);
-                break;
-            }
-        }
+        logo = new ImageView();
+        logo.setFitWidth(400);
+        logo.setPreserveRatio(true);
+        updateLogoImage();
 
-        // Reset button (top right)
-        FXGLButton resetBtn = (FXGLButton) FXGL.getUIFactoryService().newButton("Reset");
-        resetBtn.setStyle("-fx-background-color: #607d8b; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold; -fx-border-radius: 5px; -fx-padding: 6 12;");
-        resetBtn.setPrefWidth(100);
-        resetBtn.setOnAction(e -> clearAll());
-        HBox resetBox = new HBox(resetBtn);
-        resetBox.setAlignment(Pos.CENTER_RIGHT);
-        resetBox.setPadding(new Insets(10)); // Margin from top/right borders
-        root.setTop(resetBox);
+        FXGLButton prevBtn = createStyledButton("Previous", "#4caf50", "#3e8e41");
+        FXGLButton nextBtn = createStyledButton("Next", "#ff6f61", "#e65b50");
 
-        // GridPane for compress/decompress sections
-        GridPane grid = new GridPane();
-        grid.setHgap(20);
-        grid.setVgap(10);
-        grid.setAlignment(Pos.CENTER);
-        grid.setPadding(new Insets(10));
-        grid.setMaxWidth(Double.MAX_VALUE);
-        grid.setPrefWidth(870);
+        prevBtn.setOnAction(e -> {
+            logoIndex = (logoIndex - 1 + slideshowImages.length) % slideshowImages.length;
+            updateLogoImage();
+        });
+        nextBtn.setOnAction(e -> {
+            logoIndex = (logoIndex + 1) % slideshowImages.length;
+            updateLogoImage();
+        });
 
-        // Column constraints
-        ColumnConstraints col0 = new ColumnConstraints();
-        col0.setHgrow(Priority.ALWAYS);
-        col0.setPercentWidth(50);
-        ColumnConstraints col1 = new ColumnConstraints();
-        col1.setHgrow(Priority.ALWAYS);
-        col1.setPercentWidth(50);
-        grid.getColumnConstraints().addAll(col0, col1);
+        HBox logoBox = new HBox(30, prevBtn, logo, nextBtn);
+        logoBox.setAlignment(Pos.CENTER);
+        logoBox.setPadding(new Insets(20));
+        logoBox.setPrefWidth(1920);
 
-        // Row constraints
-        RowConstraints row0 = new RowConstraints();
-        row0.setVgrow(Priority.ALWAYS);
-        row0.setMaxHeight(400);
-        RowConstraints row1 = new RowConstraints();
-        row1.setVgrow(Priority.NEVER);
-        row1.setMinHeight(60);
-        grid.getRowConstraints().addAll(row0, row1);
-
-        // Compress section
-        Text compressTitle = FXGL.getUIFactoryService().newText("Compressor");
-        compressTitle.setFill(Color.DARKRED);
-        compressTitle.setStyle("-fx-font-size: 18px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold;");
         compressDropLabel = createDropLabel("Drag .jpg/.png here", "#ff6f61");
         compressPreview = createPreview();
         compressProgressBar = new ProgressBar(0);
         compressProgressBar.setMaxWidth(Double.MAX_VALUE);
-        VBox compressPane = new VBox(10, compressTitle, compressDropLabel, compressPreview, compressProgressBar);
-        compressPane.setAlignment(Pos.CENTER);
-        compressPane.setStyle("-fx-background-color: #f4f0e4;");
-        String[] acceptedFileExtensions = {".jpg", ".png"};
-        setupDragHandlers(compressDropLabel, acceptedFileExtensions, file -> {
+        setupDragHandlers(compressDropLabel, new String[]{".jpg", ".png"}, file -> {
             compressFile = file;
             compressDropLabel.setText(file.getName());
             compressPreview.setImage(new Image(file.toURI().toString(), 350, 150, true, true));
-
-            FXGL.animationBuilder().fadeIn(compressPreview).buildAndPlay();
         });
 
-        // Decompress section
-        Text decompressTitle = FXGL.getUIFactoryService().newText("Decompressor");
-        decompressTitle.setFill(Color.DARKGREEN);
-        decompressTitle.setStyle("-fx-font-size: 18px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold;");
+        FXGLButton compressBtn = createStyledButton("Compress", "#ff6f61", "#e65b50");
+        compressBtn.setPrefWidth(250);
+        compressBtn.setOnAction(e -> runCompressTask());
+        Text compressorText = FXGL.getUIFactoryService().newText("Compressor");
+        compressorText.setFill(Color.RED);
+
+        VBox compressPane = new VBox(15,
+                compressorText,
+                compressDropLabel,
+                compressPreview,
+                compressProgressBar,
+                compressBtn);
+        compressPane.setAlignment(Pos.TOP_CENTER);
+        compressPane.setPrefWidth(900);
+
         decompressDropLabel = createDropLabel("Drag .byt here", "#4caf50");
         decompressPreview = createPreview();
         decompressProgressBar = new ProgressBar(0);
         decompressProgressBar.setMaxWidth(Double.MAX_VALUE);
-        VBox decompressPane = new VBox(10, decompressTitle, decompressDropLabel, decompressPreview, decompressProgressBar);
-        decompressPane.setAlignment(Pos.CENTER);
-        decompressPane.setStyle("-fx-background-color: #f4f0e4;");
         setupDragHandlers(decompressDropLabel, new String[]{".byt"}, file -> {
             decompressFile = file;
             decompressDropLabel.setText(file.getName());
             decompressPreview.setImage(null);
         });
 
-        // Buttons
-        String compStyle = "-fx-background-color: #ff6f61; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold; -fx-border-radius: 5px; -fx-padding: 8 16;";
-        String compHover = "-fx-background-color: #e55a50; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold; -fx-border-radius: 5px; -fx-padding: 8 16;";
-        FXGLButton compressBtn = (FXGLButton) FXGL.getUIFactoryService().newButton("Compress");
-        compressBtn.setStyle(compStyle);
-        compressBtn.setPrefWidth(180);
-        compressBtn.setOnMouseEntered(e -> compressBtn.setStyle(compHover));
-        compressBtn.setOnMouseExited(e -> compressBtn.setStyle(compStyle));
-        compressBtn.setOnAction(e -> runCompressTask());
-
-        String decompStyle = "-fx-background-color: #4caf50; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold; -fx-border-radius: 5px; -fx-padding: 8 16;";
-        String decompHover = "-fx-background-color: #3fa045; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold; -fx-border-radius: 5px; -fx-padding: 8 16;";
-        FXGLButton decompressBtn = (FXGLButton) FXGL.getUIFactoryService().newButton("Decompress");
-        decompressBtn.setStyle(decompStyle);
-        decompressBtn.setPrefWidth(180);
-        decompressBtn.setOnMouseEntered(e -> decompressBtn.setStyle(decompHover));
-        decompressBtn.setOnMouseExited(e -> decompressBtn.setStyle(decompStyle));
+        FXGLButton decompressBtn = createStyledButton("Decompress", "#4caf50", "#3e8e41");
+        decompressBtn.setPrefWidth(250);
         decompressBtn.setOnAction(e -> runDecompressTask());
 
-        // Center buttons
-        HBox compressBtnBox = new HBox(compressBtn);
-        compressBtnBox.setAlignment(Pos.CENTER);
-        compressBtnBox.setPadding(new Insets(5));
-        HBox decompressBtnBox = new HBox(decompressBtn);
-        decompressBtnBox.setAlignment(Pos.CENTER);
-        decompressBtnBox.setPadding(new Insets(5));
+        pngCheckBox = new CheckBox("Save as PNG");
+        pngCheckBox.setSelected(false);
+        Text decompressText = FXGL.getUIFactoryService().newText("Decompressor");
+        decompressText.setFill(Color.GREEN);
 
-        // Add to grid
-        grid.add(compressPane, 0, 0);
-        grid.add(decompressPane, 1, 0);
-        grid.add(compressBtnBox, 0, 1);
-        grid.add(decompressBtnBox, 1, 1);
+        VBox decompressPane = new VBox(15,
+                decompressText,
+                decompressDropLabel,
+                decompressPreview,
+                decompressProgressBar,
+                decompressBtn,
+                pngCheckBox);
+        decompressPane.setAlignment(Pos.TOP_CENTER);
+        decompressPane.setPrefWidth(900);
 
-        // Main content layout (logo, grid)
-        VBox content = new VBox(10, logo, grid);
-        content.setAlignment(Pos.CENTER);
-        content.setPadding(new Insets(15, 15, 20, 15));
-        content.setStyle("-fx-background-color: #f4f0e4;");
-        content.setMaxWidth(Double.MAX_VALUE);
-        VBox.setVgrow(grid, Priority.ALWAYS);
 
-        // Set content in root center
-        root.setCenter(content);
+        HBox ioBox = new HBox(60, compressPane, decompressPane);
+        ioBox.setAlignment(Pos.TOP_CENTER);
+        ioBox.setPadding(new Insets(30));
+        ioBox.setPrefWidth(1920);
 
-        // Add to scene
+        FXGLButton resetBtn = createStyledButton("Reset", "#607d8b", "#4e6b7a");
+        resetBtn.setPrefWidth(250);
+        resetBtn.setOnAction(e -> clearAll());
+
+        HBox resetBox = new HBox(resetBtn);
+        resetBox.setAlignment(Pos.CENTER);
+        resetBox.setPadding(new Insets(20));
+
+        VBox layout = new VBox(logoBox, ioBox, resetBox);
+        layout.setAlignment(Pos.TOP_CENTER);
+        layout.setPadding(new Insets(10));
+        layout.setPrefWidth(1920);
+        layout.setPrefHeight(1080);
+
+        root.setCenter(layout);
         FXGL.getGameScene().addUINode(root);
-        FXGL.getGameScene().setBackgroundColor(Color.web("#f4f0e4"));
 
-        Platform.runLater(() -> {
-            FXGL.getPrimaryStage().setMinWidth(800);
-            FXGL.getPrimaryStage().setMinHeight(700);
-            FXGL.getPrimaryStage().setResizable(true);
-        });
-
-        // Load sound
         URL soundUrl = getClass().getResource("/assets/textures/Audio/done.wav");
         if (soundUrl != null) {
             successSound = new AudioClip(soundUrl.toExternalForm());
         }
+
+        Platform.runLater(() -> {
+            FXGL.getPrimaryStage().setMinWidth(1920);
+            FXGL.getPrimaryStage().setMinHeight(1080);
+            FXGL.getPrimaryStage().setResizable(false);
+        });
     }
 
-    private void showPopup(String message, double width, double height) {
-        Stage popup = new Stage();
-        popup.initOwner(FXGL.getPrimaryStage());
-        popup.initStyle(StageStyle.UTILITY);
-        popup.setTitle("Operation Complete");
-        popup.setResizable(false);
-
-        Text text = new Text(message);
-        text.setStyle("-fx-font-size: 12px; -fx-font-family: 'Roboto', 'Verdana', sans-serif;");
-        text.setFill(Color.BLACK);
-        text.setWrappingWidth(width - 40); // Account for padding
-
-        FXGLButton closeBtn = (FXGLButton) FXGL.getUIFactoryService().newButton("Close");
-        closeBtn.setStyle("-fx-background-color: #607d8b; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-font-weight: bold; -fx-border-radius: 5px; -fx-padding: 6 12;");
-        closeBtn.setPrefWidth(100);
-        closeBtn.setOnAction(e -> popup.close());
-
-        VBox popupContent = new VBox(10, text, closeBtn);
-        popupContent.setAlignment(Pos.CENTER);
-        popupContent.setPadding(new Insets(15));
-        popupContent.setStyle("-fx-background-color: #f4f0e4;");
-
-        popup.setScene(new javafx.scene.Scene(popupContent, width, height));
-        popup.setX(FXGL.getPrimaryStage().getX() + (FXGL.getPrimaryStage().getWidth() - width) / 2);
-        popup.setY(FXGL.getPrimaryStage().getY() + (FXGL.getPrimaryStage().getHeight() - height) / 2);
-        popup.show();
+    private FXGLButton createStyledButton(String text, String baseColor, String hoverColor) {
+        FXGLButton btn = (FXGLButton) FXGL.getUIFactoryService().newButton(text);
+        btn.setStyle("-fx-background-color: " + baseColor + "; -fx-text-fill: black;");
+        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: " + hoverColor + "; -fx-text-fill: black;"));
+        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: " + baseColor + "; -fx-text-fill: black;"));
+        return btn;
     }
 
-    private Label createDropLabel(String text, String borderColor) {
-        Label label = new Label(text);
-        label.setMaxWidth(Double.MAX_VALUE);
-        label.setPrefWidth(350);
-        label.setPrefHeight(50);
-        label.setStyle("-fx-border-color: " + borderColor + "; -fx-border-style: dashed; -fx-alignment: center; -fx-font-size: 14px; -fx-font-family: 'Roboto', 'Verdana', sans-serif; -fx-background-color: white; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-padding: 8;");
-        return label;
-    }
-
-    private ImageView createPreview() {
-        ImageView iv = new ImageView();
-        iv.setFitWidth(350);
-        iv.setFitHeight(150);
-        iv.setPreserveRatio(true);
-        iv.setStyle("-fx-border-color: lightgray; -fx-border-radius: 5px; -fx-background-radius: 5px;");
-        return iv;
+    private void updateLogoImage() {
+        URL u = getClass().getResource(slideshowImages[logoIndex]);
+        if (u != null) {
+            logo.setImage(new Image(u.toExternalForm()));
+        }
     }
 
     private void runCompressTask() {
@@ -256,27 +209,34 @@ public class GameByteApp extends GameApplication {
 
         Task<Void> task = new Task<>() {
             @Override
-            protected Void call() {
+            protected Void call() throws Exception {
                 updateProgress(-1, 1);
-                String fileExtension = compressFile.getName().contains(".png") ? ".png" : ".jpg";
-                String outputPath = compressFile.getParent() + File.separator + "compressed_" + compressFile.getName().replace(fileExtension, ".byt");
-                try {
-                    GameByteCompressor.compress(compressFile.getAbsolutePath(), outputPath);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                String ext = compressFile.getName().endsWith(".png") ? ".png" : ".jpg";
+                String outputPath = compressFile.getParent() + "/compressed_" + compressFile.getName().replace(ext, ".byt");
+                startTime = System.nanoTime();
+                GameByteCompressor.compress(compressFile.getAbsolutePath(), outputPath);
                 return null;
             }
         };
-        String target = compressFile.getAbsolutePath().contains(".png") ? ".png" : ".jpg";
+
         bindProgress(task, compressProgressBar);
         task.setOnSucceeded(e -> {
-                completeProgress(compressProgressBar);
-                playSuccessSound();
-                showCompressionResult(compressFile, new File(compressFile.getParent() + File.separator + "compressed_" + compressFile.getName().replace(target, ".byt")));
+            endTime = System.nanoTime();
+            completeProgress(compressProgressBar);
+            playSuccessSound();
+            File outFile = new File(compressFile.getParent(), "compressed_" + compressFile.getName().replaceAll("\\.(png|jpg)", ".byt"));
+            long size2 = outFile.length();
+            long size1 = compressFile.length();
+            long differenceBytes = size1 - size2;
+            double differenceKB = (double) differenceBytes / 1024;
+            double compressionPercent = ((double) differenceBytes / size1) * 100;
+
+            double timeTakenS = (endTime - startTime) / 1_000_000_000.0;
+            String timeTaken = String.format("%.2f", timeTakenS) + " seconds";
+            String valueResult = String.format("Compression reduction: %.2f%%\nDifference: %d bytes (%.2f KB)", compressionPercent, differenceBytes, differenceKB);
+            showPopup("Compression complete!\nSaved as: " + outFile.getAbsolutePath() + "\nOriginal Size: " + size1 + " bytes" + "\nCompressed Size: " + size2 + " bytes" + "\n" + valueResult + "\nTime taken: " + timeTaken, 800, 250);
         });
         task.setOnFailed(e -> handleError(task.getException()));
-
         new Thread(task).start();
     }
 
@@ -288,15 +248,11 @@ public class GameByteApp extends GameApplication {
 
         Task<Void> task = new Task<>() {
             @Override
-            protected Void call() {
+            protected Void call() throws Exception {
                 updateProgress(-1, 1);
-                String replacement = compressFile.getAbsolutePath().contains(".png") ? ".png" : ".jpg";
-                String outputPath = decompressFile.getParent() + File.separator + "decompressed_" + decompressFile.getName().replace(".byt", replacement);
-                try {
-                    GameByteDecompressor.decompress(decompressFile.getAbsolutePath(), outputPath);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                String format = pngCheckBox.isSelected() ? ".png" : ".jpg";
+                String outputPath = decompressFile.getParent() + "/decompressed_" + decompressFile.getName().replace(".byt", format);
+                GameByteDecompressor.decompress(decompressFile.getAbsolutePath(), outputPath);
                 return null;
             }
         };
@@ -305,95 +261,113 @@ public class GameByteApp extends GameApplication {
         task.setOnSucceeded(e -> {
             completeProgress(decompressProgressBar);
             playSuccessSound();
-            File outFile = new File(decompressFile.getParent() + File.separator + "decompressed_" + decompressFile.getName().replace(".byt", ".jpg"));
-            showDecompressionResult(decompressFile, outFile);
-            if (outFile.exists()) {
-                decompressPreview.setImage(new Image(outFile.toURI().toString(), 350, 150, true, true));
-            }
+            String format = pngCheckBox.isSelected() ? ".png" : ".jpg";
+            File outFile = new File(decompressFile.getParent(), "decompressed_" + decompressFile.getName().replace(".byt", format));
+            decompressPreview.setImage(new Image(outFile.toURI().toString(), 350, 150, true, true));
+            showPopup("Decompression complete: " + outFile.getName(), 400, 200);
         });
         task.setOnFailed(e -> handleError(task.getException()));
-
         new Thread(task).start();
     }
 
     private void bindProgress(Task<?> task, ProgressBar progressBar) {
-        task.setOnRunning(e -> progressBar.progressProperty().bind(task.progressProperty()));
+        progressBar.progressProperty().bind(task.progressProperty());
     }
 
-    private void completeProgress(ProgressBar progressBar) {
-        progressBar.progressProperty().unbind();
-        progressBar.setProgress(0);
+    private void completeProgress(ProgressBar bar) {
+        bar.progressProperty().unbind();
+        bar.setProgress(0);
     }
 
-    private void showCompressionResult(File original, File compressed) {
-        long orig = original.length();
-        long comp = compressed.length();
-        double reduction = ((double) (orig - comp) / orig) * 100;
-        String message = String.format("Compression Complete!\nSaved to: %s\nOriginal Size: %d bytes\nCompressed Size: %d bytes\n%% Reduction: %.2f%%",
-                compressed.getAbsolutePath(), orig, comp, reduction);
-        showPopup(message, 400, 200);
+    private Label createDropLabel(String text, String borderColor) {
+        Label label = new Label(text);
+        label.setPrefSize(350, 50);
+        label.setStyle("-fx-border-color: " + borderColor + "; -fx-border-style: dashed; -fx-background-color: white; -fx-alignment: center;");
+        return label;
     }
 
-    private void showDecompressionResult(File original, File decompressed) {
-        String message = String.format("Decompression Complete!\nSaved to: %s", decompressed.getAbsolutePath());
-        showPopup(message, 400, 150);
+    private ImageView createPreview() {
+        ImageView iv = new ImageView();
+        iv.setFitWidth(350);
+        iv.setFitHeight(150);
+        iv.setPreserveRatio(true);
+        iv.setStyle("-fx-border-color: lightgray;");
+        return iv;
     }
 
-    private void showError(String message) {
-        showPopup("Error: " + message, 400, 100);
+    private void clearAll() {
+        compressFile = null;
+        decompressFile = null;
+        compressDropLabel.setText("Drag .jpg/.png here");
+        decompressDropLabel.setText("Drag .byt here");
+        compressPreview.setImage(null);
+        decompressPreview.setImage(null);
+        compressProgressBar.setProgress(0);
+        decompressProgressBar.setProgress(0);
+    }
+
+    private void showPopup(String message, double width, double height) {
+        Stage popup = new Stage();
+        popup.initOwner(FXGL.getPrimaryStage());
+        popup.initStyle(StageStyle.UTILITY);
+        popup.setTitle("Info");
+
+        Text text = new Text(message);
+        FXGLButton closeBtn = (FXGLButton) FXGL.getUIFactoryService().newButton("Close");
+        closeBtn.setOnAction(e -> popup.close());
+
+        VBox content = new VBox(10, text, closeBtn);
+        content.setAlignment(Pos.CENTER);
+        content.setPadding(new Insets(15));
+        popup.setScene(new Scene(content, width, height));
+        popup.show();
     }
 
     private void handleError(Throwable throwable) {
         completeProgress(compressProgressBar);
         completeProgress(decompressProgressBar);
         showError("An error occurred: " + throwable.getMessage());
-        throwable.printStackTrace();
     }
 
-    private void clearAll() {
-        compressFile = null;
-        decompressFile = null;
-        compressPreview.setImage(null);
-        decompressPreview.setImage(null);
-        compressProgressBar.setProgress(0);
-        decompressProgressBar.setProgress(0);
-        compressDropLabel.setText("Drag .jpg/.png here");
-        decompressDropLabel.setText("Drag .byt here");
-    }
-
-    private void playSuccessSound() {
-        if (successSound != null) {
-            successSound.play();
-        }
+    private void showError(String message) {
+        showPopup("Error: " + message, 400, 150);
     }
 
     private void setupDragHandlers(Label label, String[] extensions, Consumer<File> onDrop) {
-        label.setOnDragOver(event -> {
-            Dragboard db = event.getDragboard();
-            for(String extension : extensions){
-                if (db.hasFiles() && db.getFiles().get(0).getName().toLowerCase().endsWith(extension)) {
-                    event.acceptTransferModes(TransferMode.COPY);
-                    break;
+        label.setOnDragOver(e -> {
+            Dragboard db = e.getDragboard();
+            if (db.hasFiles()) {
+                for (String ext : extensions) {
+                    if (db.getFiles().get(0).getName().toLowerCase().endsWith(ext)) {
+                        e.acceptTransferModes(TransferMode.COPY);
+                        break;
+                    }
                 }
             }
-            event.consume();
+            e.consume();
         });
 
-        label.setOnDragDropped(event -> {
-            Dragboard db = event.getDragboard();
+        label.setOnDragDropped(e -> {
+            Dragboard db = e.getDragboard();
             boolean success = false;
             if (db.hasFiles()) {
                 File file = db.getFiles().get(0);
-                for(String extension : extensions){
-                    if (file.getName().toLowerCase().endsWith(extension)) {
+                for (String ext : extensions) {
+                    if (file.getName().toLowerCase().endsWith(ext)) {
                         onDrop.accept(file);
                         success = true;
                         break;
                     }
                 }
             }
-            event.setDropCompleted(success);
-            event.consume();
+            e.setDropCompleted(success);
+            e.consume();
         });
+    }
+
+    private void playSuccessSound() {
+        if (successSound != null) {
+            successSound.play();
+        }
     }
 }
