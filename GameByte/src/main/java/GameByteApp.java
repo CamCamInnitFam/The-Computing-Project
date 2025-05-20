@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -18,6 +19,7 @@ import javafx.scene.layout.*;
 import javafx.scene.media.AudioClip;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -45,7 +47,6 @@ public class GameByteApp extends GameApplication {
     private Label decompressDropLabel;
 
     private ImageView logo;
-    private int logoIndex = 0;
 
     long startTime;
     long endTime;
@@ -73,24 +74,19 @@ public class GameByteApp extends GameApplication {
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: #f4f0e4;");
 
+
         logo = new ImageView();
         logo.setFitWidth(400);
         logo.setPreserveRatio(true);
-        updateLogoImage();
+        URL u = getClass().getResource(slideshowImages[0]);
+        if (u != null) {
+            logo.setImage(new Image(u.toExternalForm()));
+        }
 
-        FXGLButton prevBtn = createStyledButton("Previous", "#4caf50", "#3e8e41");
-        FXGLButton nextBtn = createStyledButton("Next", "#ff6f61", "#e65b50");
+        //make logo clickable - opens the slideshow popup
+        logo.setOnMouseClicked(e -> openSlideshowPopup());
 
-        prevBtn.setOnAction(e -> {
-            logoIndex = (logoIndex - 1 + slideshowImages.length) % slideshowImages.length;
-            updateLogoImage();
-        });
-        nextBtn.setOnAction(e -> {
-            logoIndex = (logoIndex + 1) % slideshowImages.length;
-            updateLogoImage();
-        });
-
-        HBox logoBox = new HBox(30, prevBtn, logo, nextBtn);
+        HBox logoBox = new HBox(logo);
         logoBox.setAlignment(Pos.CENTER);
         logoBox.setPadding(new Insets(20));
         logoBox.setPrefWidth(1920);
@@ -98,7 +94,7 @@ public class GameByteApp extends GameApplication {
         compressDropLabel = createDropLabel("Drag .jpg/.png here", "#ff6f61");
         compressPreview = createPreview();
         compressProgressBar = new ProgressBar(0);
-        compressProgressBar.setMaxWidth(Double.MAX_VALUE);
+        compressProgressBar.setPrefWidth(300);
         setupDragHandlers(compressDropLabel, new String[]{".jpg", ".png"}, file -> {
             compressFile = file;
             compressDropLabel.setText(file.getName());
@@ -123,7 +119,7 @@ public class GameByteApp extends GameApplication {
         decompressDropLabel = createDropLabel("Drag .byt here", "#4caf50");
         decompressPreview = createPreview();
         decompressProgressBar = new ProgressBar(0);
-        decompressProgressBar.setMaxWidth(Double.MAX_VALUE);
+        decompressProgressBar.setPrefWidth(300);
         setupDragHandlers(decompressDropLabel, new String[]{".byt"}, file -> {
             decompressFile = file;
             decompressDropLabel.setText(file.getName());
@@ -148,7 +144,6 @@ public class GameByteApp extends GameApplication {
                 pngCheckBox);
         decompressPane.setAlignment(Pos.TOP_CENTER);
         decompressPane.setPrefWidth(900);
-
 
         HBox ioBox = new HBox(60, compressPane, decompressPane);
         ioBox.setAlignment(Pos.TOP_CENTER);
@@ -178,10 +173,54 @@ public class GameByteApp extends GameApplication {
         }
 
         Platform.runLater(() -> {
-            FXGL.getPrimaryStage().setMinWidth(1920);
-            FXGL.getPrimaryStage().setMinHeight(1080);
-            FXGL.getPrimaryStage().setResizable(false);
+            FXGL.getPrimaryStage().setMinWidth(960);
+            FXGL.getPrimaryStage().setMinHeight(540);
+            FXGL.getPrimaryStage().setResizable(true);
         });
+    }
+
+    private void openSlideshowPopup() {
+        Stage slideshowStage = new Stage();
+        slideshowStage.initOwner(FXGL.getPrimaryStage());
+        slideshowStage.initStyle(StageStyle.UTILITY);
+        slideshowStage.setTitle("Slideshow");
+
+        ImageView slideshowImage = new ImageView();
+        slideshowImage.setFitWidth(800);
+        slideshowImage.setPreserveRatio(true);
+
+        final int[] currentIndex = {0};
+        updateImage(slideshowImage, currentIndex[0]);
+
+        FXGLButton prevBtn = createStyledButton("Previous", "#4caf50", "#3e8e41");
+        prevBtn.setOnAction(e -> {
+            currentIndex[0] = (currentIndex[0] - 1 + slideshowImages.length) % slideshowImages.length;
+            updateImage(slideshowImage, currentIndex[0]);
+        });
+
+        FXGLButton nextBtn = createStyledButton("Next", "#ff6f61", "#e65b50");
+        nextBtn.setOnAction(e -> {
+            currentIndex[0] = (currentIndex[0] + 1) % slideshowImages.length;
+            updateImage(slideshowImage, currentIndex[0]);
+        });
+
+        HBox buttonBox = new HBox(20, prevBtn, nextBtn);
+        buttonBox.setAlignment(Pos.CENTER);
+
+        VBox content = new VBox(20, slideshowImage, buttonBox);
+        content.setAlignment(Pos.CENTER);
+        content.setPadding(new Insets(20));
+
+        Scene scene = new Scene(content, 900, 600);
+        slideshowStage.setScene(scene);
+        slideshowStage.show();
+    }
+
+    private void updateImage(ImageView imageView, int index) {
+        URL u = getClass().getResource(slideshowImages[index]);
+        if (u != null) {
+            imageView.setImage(new Image(u.toExternalForm()));
+        }
     }
 
     private FXGLButton createStyledButton(String text, String baseColor, String hoverColor) {
@@ -190,13 +229,6 @@ public class GameByteApp extends GameApplication {
         btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: " + hoverColor + "; -fx-text-fill: black;"));
         btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: " + baseColor + "; -fx-text-fill: black;"));
         return btn;
-    }
-
-    private void updateLogoImage() {
-        URL u = getClass().getResource(slideshowImages[logoIndex]);
-        if (u != null) {
-            logo.setImage(new Image(u.toExternalForm()));
-        }
     }
 
     private void runCompressTask() {
