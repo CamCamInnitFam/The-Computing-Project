@@ -65,7 +65,7 @@ public class GameByteApp extends GameApplication {
     @Override
     protected void initSettings(GameSettings settings) {
         settings.setTitle("GameByte");
-        settings.setWidth(1920);
+        settings.setWidth(1420);
         settings.setHeight(1080);
     }
 
@@ -89,7 +89,7 @@ public class GameByteApp extends GameApplication {
         HBox logoBox = new HBox(logo);
         logoBox.setAlignment(Pos.CENTER);
         logoBox.setPadding(new Insets(20));
-        logoBox.setPrefWidth(1920);
+        logoBox.setPrefWidth(1420);
 
         compressDropLabel = createDropLabel("Drag .jpg/.png here", "#ff6f61");
         compressPreview = createPreview();
@@ -148,7 +148,7 @@ public class GameByteApp extends GameApplication {
         HBox ioBox = new HBox(60, compressPane, decompressPane);
         ioBox.setAlignment(Pos.TOP_CENTER);
         ioBox.setPadding(new Insets(30));
-        ioBox.setPrefWidth(1920);
+        ioBox.setPrefWidth(1420);
 
         FXGLButton resetBtn = createStyledButton("Reset", "#607d8b", "#4e6b7a");
         resetBtn.setPrefWidth(250);
@@ -161,7 +161,7 @@ public class GameByteApp extends GameApplication {
         VBox layout = new VBox(logoBox, ioBox, resetBox);
         layout.setAlignment(Pos.TOP_CENTER);
         layout.setPadding(new Insets(10));
-        layout.setPrefWidth(1920);
+        layout.setPrefWidth(1420);
         layout.setPrefHeight(1080);
 
         root.setCenter(layout);
@@ -173,7 +173,7 @@ public class GameByteApp extends GameApplication {
         }
 
         Platform.runLater(() -> {
-            FXGL.getPrimaryStage().setMinWidth(960);
+            FXGL.getPrimaryStage().setMinWidth(710);
             FXGL.getPrimaryStage().setMinHeight(540);
             FXGL.getPrimaryStage().setResizable(true);
         });
@@ -211,7 +211,7 @@ public class GameByteApp extends GameApplication {
         content.setAlignment(Pos.CENTER);
         content.setPadding(new Insets(20));
 
-        Scene scene = new Scene(content, 900, 600);
+        Scene scene = new Scene(content, 950, 870);
         slideshowStage.setScene(scene);
         slideshowStage.show();
     }
@@ -220,6 +220,11 @@ public class GameByteApp extends GameApplication {
         URL u = getClass().getResource(slideshowImages[index]);
         if (u != null) {
             imageView.setImage(new Image(u.toExternalForm()));
+            if(index == 0){
+                imageView.setFitWidth(450);
+            }else{
+                imageView.setFitWidth(800);
+            }
         }
     }
 
@@ -334,6 +339,7 @@ public class GameByteApp extends GameApplication {
         decompressPreview.setImage(null);
         compressProgressBar.setProgress(0);
         decompressProgressBar.setProgress(0);
+        pngCheckBox.setSelected(false);
     }
 
     private void showPopup(String message, double width, double height) {
